@@ -3,5 +3,5 @@ This is a simple-ish server that uses [WebCam API](https://github.com/sarxos/web
 
 This project uses Maven for the few dependencies, and is somewhat capable of building a standalone jar.
 
-##TODO
+## TODO
 - Add arguments to jar
