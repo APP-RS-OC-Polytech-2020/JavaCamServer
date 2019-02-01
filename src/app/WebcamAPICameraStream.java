@@ -9,32 +9,49 @@ import java.util.Timer;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.net.InetSocketAddress;
+
+import picocli.CommandLine.Option;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 /**
- * Classe principale qui permet d'initialiser et lancer le serveur.
- * Aka: MainClass
+ * Main class which initialize and launch the server.
  * @author prospere
  *
  */
-public class WebcamAPICameraStream {
+public class WebcamAPICameraStream implements Runnable {
+	
+	final Logger logger = LoggerFactory.getLogger(WebcamAPICameraStream.class);
 
     public static BufferedImage frame = null;
     private static HttpStreamServer httpStreamService;
     static Webcam videoCapture;
-    //static Timer tmrVideoProcess;
     static Timer timerPush;
     static Timer timerPoke;
     
-    static InetSocketAddress serverAddress =  new InetSocketAddress("193.48.125.70", 50008);
+    @Option(names = {"-a","--address","--addr"}, description = "Adress of the server to poke (default: ${DEFAULT-VALUE})")
+    static String STRserverAddress =  "193.48.125.70";
+    @Option(names = {"-p","--port"}, description = "Port of the server to poke (default: ${DEFAULT-VALUE})")
+    static int serverPort = 50008;
+    @Option(names = {"-cp","--clientport","--cliport"}, description = "Port we will be using to send our images (default: ${DEFAULT-VALUE})")
     static int port = 50009;
-    static String name = "cam1";
+    @Option(names = {"-n","--name"}, description = "Name of our sender, will figure in JSON")
+    static String name = "cam";
+    @Option(names = {"-f","--fps"}, description = "Number of frames per seconds, camera-dependant (default: ${DEFAULT-VALUE})")
     static int fps = 10;
-    static int width = 176;
-    static int height = 144;
+    static int width = 640;
+    static int height = 480;
+    @Option(names = "-v" , description = "Makes the program say more things (useless rn)")
+    static boolean verbose;
+    
+    static InetSocketAddress serverAddress = new InetSocketAddress(STRserverAddress,serverPort);
     
     
-    public static void start() {
-    	
+    public void run() {
     	if(System.getProperty("os.name").toLowerCase().contains("linux")){
+    			logger.info("Oh, we're on Linux, using V4l4jDriver.");
             	Webcam.setDriver(new V4l4jDriver()); // this is important for new cam on Linux
     	}
     	
@@ -48,13 +65,23 @@ public class WebcamAPICameraStream {
 			videoCapture.open();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			System.err.println("Could not open camera.");
-            return;
+			logger.error("Could not open camera. Aborting.");
+			return;
 		}
+        
+	    logger.info("Camera opened. My name is:"
+	        		+ name
+	        		+ " and I'll stream in: "
+	        		+ width
+	        		+ "x"
+	        		+ height
+	        		+ "@"
+	        		+ fps
+	        		+ "fps.");
         
         //Demarrer le serveur
         
-        httpStreamService = new HttpStreamServer(port);
+        httpStreamService = new HttpStreamServer(port,this);
         new Thread(httpStreamService).start();
 
         //Laisser un temps de process avant de push l'image
@@ -64,19 +91,27 @@ public class WebcamAPICameraStream {
         frame = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
         
         timerPush.schedule(new PushImageTask(httpStreamService, videoCapture,frame,periodPush-20), 100, periodPush);
-        System.out.println("PushImageTask Scheduled");
-        
-       //Schedule server poke, so as to have something to work with.
-       long periodPoke = 5000;
-       timerPoke = new Timer();
-       timerPoke.schedule(new PokeServerTask(httpStreamService, port, serverAddress,name), 100, periodPoke);
-       System.out.println("PokeServerTask Scheduled");
- 
+        logger.info("PushImageTask Scheduled");
+    }
+    /**
+     * Schedule the poke Task. This will "poke" our server, 
+     * sending him a JSON message that says who we are and where we are.
+     * @param periodPoke
+     */
+    public void startPokeTask(long periodPoke){
+        //Schedule server poke, so as to have something to work with.
+        timerPoke = new Timer();
+        timerPoke.schedule(new PokeServerTask(httpStreamService, port, serverAddress,name), 100, periodPoke);
+        logger.info("PokeServerTask Scheduled");
     }
 
+    /**
+     * Main to test quickly stuff. To be run from IDE, usually.
+     * @param args
+     */
     public static void main(String[] args) {
-        start();
+    	WebcamAPICameraStream cam = new WebcamAPICameraStream();
+        cam.run();
     }
-
 
 }

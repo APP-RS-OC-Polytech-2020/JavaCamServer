@@ -21,7 +21,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>app.WebcamAPICameraStream</mainClass>
+              <mainClass>app.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -31,7 +31,7 @@
 	      	<configuration>
 		        <archive>
 		          <manifest>
-		            <mainClass>app.WebcamAPICameraStream</mainClass>
+		            <mainClass>app.Main</mainClass>
 		          </manifest>
 		        </archive>
 		        <descriptorRefs>
@@ -61,5 +61,21 @@
   		<artifactId>webcam-capture</artifactId>
   		<version>0.3.12</version>
   	</dependency>
+	  	<!-- https://mvnrepository.com/artifact/info.picocli/picocli -->
+	<dependency>
+	    <groupId>info.picocli</groupId>
+	    <artifactId>picocli</artifactId>
+	    <version>3.9.2</version>
+	</dependency>
+	   <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-api</artifactId>
+       <version>1.7.5</version>
+   </dependency>
+   <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-log4j12</artifactId>
+       <version>1.7.5</version>
+   </dependency>
   </dependencies>
 </project>

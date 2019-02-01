@@ -1,6 +1,9 @@
 package app;
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ServerSocket;
@@ -14,20 +17,24 @@ import java.net.Socket;
 public class HttpStreamServer implements Runnable {
 
 
-    //private BufferedImage img = null;
+	final Logger logger = LoggerFactory.getLogger(HttpStreamServer.class);
+	
     private ServerSocket serverSocket;
     private Socket socket;
     private final String boundary = "stream";
     private OutputStream outputStream;
-
     private int port;
-    
     public boolean connected;
+	private WebcamAPICameraStream server;
 
-    public HttpStreamServer(int port) {
+    private HttpStreamServer(int port) {
         
         this.port = port;
         connected = false;
+    }
+    public HttpStreamServer(int port, WebcamAPICameraStream server) {
+    	this(port);
+    	this.server = server;
     }
 
     /**
@@ -36,10 +43,13 @@ public class HttpStreamServer implements Runnable {
      */
     public void startStreamingServer() throws IOException {
         serverSocket = new ServerSocket(port);
+        
+        /* Trying cleanup
         socket = serverSocket.accept();
         connected = true;
         System.out.println("Socket Accepted");
         writeHeader(socket.getOutputStream(), boundary);
+        */
     }
     /**
      * Classe qui ecris le header HTTP pour exposer le flux. 
@@ -66,10 +76,9 @@ public class HttpStreamServer implements Runnable {
      * @param frame
      * @throws IOException
      */
-    public void pushImage(BufferedImage frame) throws IOException {
-        if (frame == null)
-            return;
-        try {
+    public void pushImage(BufferedImage frame) {
+        if (frame == null){return;}
+        try{
             outputStream = socket.getOutputStream();
             //BufferedImage img = Mat2bufferedImage(frame);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -80,16 +89,14 @@ public class HttpStreamServer implements Runnable {
                     "\r\n").getBytes());
             outputStream.write(imageBytes);
             outputStream.write(("\r\n--" + boundary + "\r\n").getBytes());
-            
-        } catch (Exception ex) {
-        	//If exception, mean client disconnected. We wait for new client to come.
-        	System.out.println("Client Disconnected, wait for socket");
-        	connected = false;
+        }catch(IOException e){
         	
-            socket = serverSocket.accept();
-            connected = true;
-            System.out.println("Client reconnected");
-            writeHeader(socket.getOutputStream(), boundary);
+
+        	//If exception, mean client disconnected. We wait for new client to come.
+        	
+        	logger.warn("Cannot push image to client. Disconnecting.");
+        	connected = false;
+        	try{socket.close();}catch(IOException el){el.printStackTrace();}
         }
     }
 
@@ -99,17 +106,45 @@ public class HttpStreamServer implements Runnable {
      */
     public void run() {
         try {
-            System.out.println("go to  http://localhost:"+this.port+" with browser");
+        	logger.info("go to  http://localhost:"+this.port+" with browser");
             startStreamingServer();
             
         } catch (IOException e) {
         	e.printStackTrace();
             return;
         }
+        while(true){
+	        if(connected==false){
+	        	logger.info("Now we wait for a client");
+	            server.startPokeTask(5000);
+	            try {
+	            	socket = serverSocket.accept();
+		            connected = true;
+		            logger.info("Client connected.");
+		            try {
+						writeHeader(socket.getOutputStream(), boundary);
+					} catch (IOException e) {
+						connected = false;
+						try {socket.close();} catch (IOException e1) {e1.printStackTrace();} //Something went terribly wrong
+					}
+	            } catch (IOException e) {
+	            	logger.warn("We tried connecting, but it didn't work. Retrying...");
+	            } 
+	        }//End if
+	        else{
+	        	//System.out.println("kek");
+	        	try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+	        }
+        }//End while
 
-    }
+    }//End run
     
     /**
+     * Methode qui arrête le serveur.
      * Quasiement jamais utilisé. Uniquement lorsque la socket meurt.
      * @throws IOException
      */
@@ -117,21 +152,6 @@ public class HttpStreamServer implements Runnable {
         socket.close();
         serverSocket.close();
     }
-//    /**
-//     * Classe qui converti un Mat de OpenCV vers une bufferedimage de Java.
-//     * @param image (org.opencv.core.Mat)
-//     * @return image (java.awt.image.BufferedImage)
-//     * @throws IOException
-//     */
-//    public static BufferedImage Mat2bufferedImage(Mat image) throws IOException {
-//        MatOfByte bytemat = new MatOfByte();
-//        Imgcodecs.imencode(".jpg", image, bytemat);
-//        byte[] bytes = bytemat.toArray();
-//        InputStream in = new ByteArrayInputStream(bytes);
-//        BufferedImage img = null;
-//        img = ImageIO.read(in);
-//        return img;
-//    }
     
     public boolean isConnected(){
     	if(socket!=null){

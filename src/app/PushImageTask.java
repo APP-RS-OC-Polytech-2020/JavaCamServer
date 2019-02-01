@@ -1,7 +1,6 @@
 package app;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.TimerTask;
 
 import com.github.sarxos.webcam.Webcam;
@@ -26,11 +25,7 @@ public class PushImageTask extends TimerTask {
 		if(sendingFrame){
 			if(httpStreamServer.isConnected()){
 				frame = video.getImage();
-				try {
-					httpStreamServer.pushImage(frame);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				httpStreamServer.pushImage(frame);
 			}
 		}else{
 			sendingFrame = true;
