@@ -38,24 +38,26 @@ public class HttpStreamServer implements Runnable {
     }
 
     /**
-     * Demarre le serveur qui va distribuer le flux
+     * Start distributing content.
      * @throws IOException
      */
     public void startStreamingServer() throws IOException {
         serverSocket = new ServerSocket(port);
-        
-        /* Trying cleanup
-        socket = serverSocket.accept();
-        connected = true;
-        System.out.println("Socket Accepted");
-        writeHeader(socket.getOutputStream(), boundary);
-        */
     }
     /**
-     * Classe qui ecris le header HTTP pour exposer le flux. 
-     * A noter que le header est ajusté pour un HTTP recent.
+     * Method which writes an HTTP header. Header is:
+     * <pre>{@code 
+     * HTTP1.0 200 OK
+     * Connection: close
+     * Max-Age: 0
+     * Expires: 0
+     * Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+     * Content-Type: multipart/x-mixed-replace;
+     * boundary=<boundary>
+     * --<boundary>
+     * }</pre>
      * @param stream
-     * @param boundary
+     * @param boundary	A string which constitute the boundary between to pieces of content
      * @throws IOException
      */
     private void writeHeader(OutputStream stream, String boundary) throws IOException {
@@ -72,7 +74,7 @@ public class HttpStreamServer implements Runnable {
     }
     
     /**
-     * Balance une image dans le stream. Elle pousse un bout de contenu (une frame).
+     * Writes picture in stream. Writing consist of a header, a bunch of bytes and a footer (bondary).
      * @param frame
      * @throws IOException
      */
@@ -144,8 +146,7 @@ public class HttpStreamServer implements Runnable {
     }//End run
     
     /**
-     * Methode qui arrête le serveur.
-     * Quasiement jamais utilisé. Uniquement lorsque la socket meurt.
+     * Stops server. Useless now as there is no way for it to stop gracefully yet.
      * @throws IOException
      */
     public void stopStreamingServer() throws IOException {

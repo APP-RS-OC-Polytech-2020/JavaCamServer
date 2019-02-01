@@ -11,6 +11,8 @@ import picocli.CommandLine;
 public class Main {
 
 	public static void main(String[] args) {
+		System.setProperty("log4j.configuration", "log4j.properties");
+		
 		CommandLine.run(new WebcamAPICameraStream(),args);
 
 	}
