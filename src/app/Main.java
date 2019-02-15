@@ -1,5 +1,10 @@
 package app;
 
+import java.io.File;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
+
 import picocli.CommandLine;
 
 /**
@@ -11,7 +16,18 @@ import picocli.CommandLine;
 public class Main {
 
 	public static void main(String[] args) {
-		System.setProperty("log4j.configuration", "log4j.properties");
+		
+		String log4jConfigFile = System.getProperty("user.dir")
+                + File.separator + "log4j.properties";
+		
+		//Check if file exist
+		File config = new File(log4jConfigFile);
+		if(config.exists()){
+			PropertyConfigurator.configure(log4jConfigFile);
+		}else{
+			System.err.println("WARNING - no config file found, defaulting to BasicConfigurator");
+			BasicConfigurator.configure();
+		}
 		
 		CommandLine.run(new WebcamAPICameraStream(),args);
 

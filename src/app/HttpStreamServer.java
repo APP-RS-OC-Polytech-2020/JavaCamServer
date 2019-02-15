@@ -10,7 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Classe qui va exposer un stream mpeg venant de la camera. 
+ * Classe qui va exposer un stream mjpeg venant de la camera. 
  * @author prospere
  *
  */
@@ -82,13 +82,12 @@ public class HttpStreamServer implements Runnable {
         if (frame == null){return;}
         try{
             outputStream = socket.getOutputStream();
-            //BufferedImage img = Mat2bufferedImage(frame);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(frame, "jpg", baos);
             byte[] imageBytes = baos.toByteArray();
             outputStream.write(("Content-type: image/jpeg\r\n" +
-                    "Content-Length: " + imageBytes.length + "\r\n" +
-                    "\r\n").getBytes());
+                    			"Content-Length: " + imageBytes.length + "\r\n" +
+                    			"\r\n").getBytes());
             outputStream.write(imageBytes);
             outputStream.write(("\r\n--" + boundary + "\r\n").getBytes());
         }catch(IOException e){
@@ -134,7 +133,6 @@ public class HttpStreamServer implements Runnable {
 	            } 
 	        }//End if
 	        else{
-	        	//System.out.println("kek");
 	        	try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {

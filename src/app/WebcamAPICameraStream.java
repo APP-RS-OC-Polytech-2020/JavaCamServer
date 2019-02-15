@@ -41,10 +41,10 @@ public class WebcamAPICameraStream implements Runnable {
     static String name = "cam";
     @Option(names = {"-f","--fps"}, description = "Number of frames per seconds, camera-dependant (default: ${DEFAULT-VALUE})")
     static int fps = 10;
+    @Option(names = {"-w","--width"}, description = "Width of the camera frame, camera-dependant (default: ${DEFAULT-VALUE})")
     static int width = 640;
+    @Option(names = {"-h","--height"}, description = "Height of the camera frame, camera-dependant (default: ${DEFAULT-VALUE})")
     static int height = 480;
-    @Option(names = "-v" , description = "Makes the program say more things (useless rn)")
-    static boolean verbose;
     
     static InetSocketAddress serverAddress = new InetSocketAddress(STRserverAddress,serverPort);
     
@@ -62,7 +62,7 @@ public class WebcamAPICameraStream implements Runnable {
         //Si la camera  ne fonctionne pas bien, on ne fait rien
         //Sinon, on commence a stream, et on notifie notre serveur.
         try {
-			videoCapture.open();
+			videoCapture.open(true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			logger.error("Could not open camera. Aborting.");
