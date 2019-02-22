@@ -23,8 +23,8 @@ Usage: <main class> [-np] [-a=<STRserverAddress>] [-cp=<port>] [-f=<fps>]
                               10)
   -h, --height=<height>     Height of the camera frame, camera-dependant (default:
                               480)
-  -n, --name=<name>         Name of our sender, will figure in JSON
-      -np, --nopoke         Switch to disable server poking.
+  -n, --name=<name>         Name of our sender, will figure in JSON (default: cam)
+      -np, --nopoke         Switch to disable server poking (default: poke enabled)
   -p, --port=<serverPort>   Port of the server to poke (default: 50008)
   -w, --width=<width>       Width of the camera frame, camera-dependant (default:
                               640)
