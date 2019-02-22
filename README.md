@@ -1,6 +1,8 @@
 # JavaCamServer
 This is a simple-ish server made with Java that uses [WebCam API](https://github.com/sarxos/webcam-capture) by @sarxos to push images to another server. This program pokes the receiving server (using a java socket and JSON) to let him know he's ready and then initiate an HTTP connexion to push images.
 
+Images are pushed as JPEG in a  HTPP multipart MPEG stream.
+
 This project uses Maven for the few dependencies, and is somewhat capable of building a standalone jar. It depends on a bunch of stuff that is described in `pom.xml`.
 
 # Usage
