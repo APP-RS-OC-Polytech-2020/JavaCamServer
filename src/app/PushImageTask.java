@@ -9,30 +9,23 @@ public class PushImageTask extends TimerTask {
 	private HttpStreamServer httpStreamServer;
 	private BufferedImage frame;
 	private Webcam video;
-	private long period;
-	private static boolean  sendingFrame = true;
+	private static boolean  sendingFrame = false;
 	
 
 	public PushImageTask(HttpStreamServer httpStreamServer, Webcam video, BufferedImage frame,long period){
 		this.httpStreamServer = httpStreamServer;
 		this.video = video;
 		this.frame = frame;
-		this.period = period;
 	}
 	@Override
 	public void run() {
-		long time = System.currentTimeMillis();
-		if(sendingFrame){
+		if(!sendingFrame){
 			if(httpStreamServer.isConnected()){
+				sendingFrame = true;
 				frame = video.getImage();
 				httpStreamServer.pushImage(frame);
+				sendingFrame = false;
 			}
-		}else{
-			sendingFrame = true;
-		}
-		long endTime = System.currentTimeMillis();
-		if(endTime-time > period){
-			sendingFrame = false;
 		}
 	}
 

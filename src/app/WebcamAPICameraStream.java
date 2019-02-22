@@ -45,14 +45,16 @@ public class WebcamAPICameraStream implements Runnable {
     static int width = 640;
     @Option(names = {"-h","--height"}, description = "Height of the camera frame, camera-dependant (default: ${DEFAULT-VALUE})")
     static int height = 480;
+    @Option(names = {"-np","--nopoke"}, description = "Switch to disable server poking.")
+    static boolean noPoke = false; 
     
     static InetSocketAddress serverAddress = new InetSocketAddress(STRserverAddress,serverPort);
     
     
     public void run() {
     	if(System.getProperty("os.name").toLowerCase().contains("linux")){
-    			logger.info("Oh, we're on Linux, using V4l4jDriver.");
-            	Webcam.setDriver(new V4l4jDriver()); // this is important for new cam on Linux
+    		logger.info("Oh, we're on Linux, using V4l4jDriver.");
+            Webcam.setDriver(new V4l4jDriver()); // this is important for new cam on Linux
     	}
     	
     	//Ouvrir la camera
@@ -66,6 +68,7 @@ public class WebcamAPICameraStream implements Runnable {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			logger.error("Could not open camera. Aborting.");
+			e.printStackTrace();
 			return;
 		}
         
@@ -100,9 +103,13 @@ public class WebcamAPICameraStream implements Runnable {
      */
     public void startPokeTask(long periodPoke){
         //Schedule server poke, so as to have something to work with.
-        timerPoke = new Timer();
-        timerPoke.schedule(new PokeServerTask(httpStreamService, port, serverAddress,name), 100, periodPoke);
-        logger.info("PokeServerTask Scheduled");
+    	if(noPoke){
+    		logger.info("NoPoke enabled, we're not going to poke, then.");
+    	}else{
+	        timerPoke = new Timer();
+	        timerPoke.schedule(new PokeServerTask(httpStreamService, port, serverAddress,name), 100, periodPoke);
+	        logger.info("PokeServerTask Scheduled");
+    	}
     }
 
     /**
