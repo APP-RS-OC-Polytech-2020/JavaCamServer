@@ -3,5 +3,4 @@ This is a simple-ish server made with Java that uses [WebCam API](https://github
 
 This project uses Maven for the few dependencies, and is somewhat capable of building a standalone jar.
 
-## TODO
-- Add arguments to jar
+
