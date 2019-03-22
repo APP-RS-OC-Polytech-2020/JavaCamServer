@@ -35,7 +35,7 @@ Usage: <main class> [-np] [-a=<STRserverAddress>] [-cp=<port>] [-f=<fps>]
 If you don't know what framerate/resolution your camera support, try what you're planning to use. The program will throw an error with the supported resolutions for your hardware if it isn't supported. Also, remember to use `log4j.properties`. One is included in the zip and repo, but ou can configure it to do the logging however you like. This project uses extensively this logging framework so you should see a lot of messages (with some not formatted, thrown from rebellious dependencies).
 
 ## Notes on the poking
-In the options you'll see the option to add a "poke server", this was initially made so you could notify another server when your camera is ready to stream. The poke consist of a simple java socket (described in `PokeServerTask.java`) in which we write the following JSON message:
+In the options you'll see the option to add a "poke server", this was initially made so you could notify another server (specifically [this one](https://github.com/APP-RS-OC-Polytech-2020/JavaRepeatServer) as part of the project decribed [here](https://github.com/APP-RS-OC-Polytech-2020/Custodia-Meta) ) when your camera is ready to stream. The poke consist of a simple java socket (described in `PokeServerTask.java`) in which we write the following JSON message:
 ```
 {
   "type":"init","
